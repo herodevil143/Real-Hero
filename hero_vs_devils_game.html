@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero vs Devils</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { text-align: center; background: #87CEEB; overflow: hidden; }
+        canvas { background: #eee; display: block; margin: 20px auto; border: 2px solid black; }
+    </style>
+</head>
+<body>
+    <h2>Hero vs Devils - Endless Runner Game</h2>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let hero = { x: 50, y: 300, width: 40, height: 40, color: "blue", vy: 0, jumping: false };
+        let enemies = [];
+        let score = 0;
+        let gravity = 1;
+
+        function drawHero() {
+            ctx.fillStyle = hero.color;
+            ctx.fillRect(hero.x, hero.y, hero.width, hero.height);
+        }
+
+        function drawEnemies() {
+            ctx.fillStyle = "red";
+            enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height));
+        }
+
+        function updateEnemies() {
+            enemies.forEach((enemy, index) => {
+                enemy.x -= 5;
+                if (enemy.x + enemy.width < 0) enemies.splice(index, 1);
+            });
+
+            if (Math.random() < 0.02) {
+                enemies.push({ x: 800, y: 320, width: 40, height: 40 });
+            }
+        }
+
+        function applyGravity() {
+            hero.y += hero.vy;
+            hero.vy += gravity;
+
+            if (hero.y > 300) {
+                hero.y = 300;
+                hero.jumping = false;
+            }
+        }
+
+        function checkCollisions() {
+            enemies.forEach((enemy, index) => {
+                if (hero.x < enemy.x + enemy.width && hero.x + hero.width > enemy.x &&
+                    hero.y < enemy.y + enemy.height && hero.y + hero.height > enemy.y) {
+                    enemies.splice(index, 1);
+                    score += 10;
+                }
+            });
+        }
+
+        function jump() {
+            if (!hero.jumping) {
+                hero.vy = -15;
+                hero.jumping = true;
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawHero();
+            drawEnemies();
+            updateEnemies();
+            applyGravity();
+            checkCollisions();
+
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 10, 20);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") jump();
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
